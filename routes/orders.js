@@ -1,5 +1,6 @@
 const router = require("express").Router();
 const Orders = require("../models/orders.model");
+const Products = require("../models/products.model");
 
 // Create new order {POST request}
 router.route("/new").post((req, res) => {
@@ -40,7 +41,20 @@ router.route("/").get((req, res) => {
 // Find one order by id {GET request}
 router.route("/:id").get((req, res) => {
   Orders.findById(req.params.id)
-    .then((order) => res.json(order))
+    .then(async (order) => {
+      const newOrder = {
+        ...order._doc,
+        products: await Promise.all(order.products.map(async (product) => {
+          return { 
+            ...(await Products.findById(product.productId))._doc,
+            quantity: product.quantity,
+            sellingPrice: product.sellingPrice
+          };
+        }))
+      };
+
+      return res.json(newOrder);
+    })
     .catch((err) => res.status(400).json(`Server Error: ${err}`));
 });
 
