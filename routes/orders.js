@@ -67,6 +67,15 @@ router.route("/:id").post((req, res) => {
     .catch((err) => res.status(400).json(`Server Error: ${err}`));
 });
 
+// Change order state to caneled by id {POST request}
+router.route("/cancel/:id").post((req, res) => {
+  Orders.findByIdAndUpdate(req.params.id, {
+    order_state: "ملغية",
+  })
+    .then(() => res.json(`Changed order state`))
+    .catch((err) => res.status(400).json(`Server Error: ${err}`));
+})
+
 // Get All Orders for one user by Id {GET request}
 router.route("/get-users-orders/:id").get((req, res) => {
   Orders.find({
